@@ -3,6 +3,16 @@
 #import "RCTBridge.h"
 #import "RCTEventDispatcher.h"
 
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
+
+#define UIUserNotificationTypeAlert UIRemoteNotificationTypeAlert
+#define UIUserNotificationTypeBadge UIRemoteNotificationTypeBadge
+#define UIUserNotificationTypeSound UIRemoteNotificationTypeSound
+#define UIUserNotificationTypeNone  UIRemoteNotificationTypeNone
+#define UIUserNotificationType      UIRemoteNotificationType
+
+#endif
+
 NSString *const OSRemoteNotificationReceived = @"RemoteNotificationReceived";
 NSString *const OSRemoteNotificationsRegistered = @"RemoteNotificationsRegistered";
 
@@ -83,8 +93,39 @@ RCT_EXPORT_MODULE(RNOneSignal)
     [_bridge.eventDispatcher sendDeviceEventWithName:@"remoteNotificationsRegistered" body:notification.userInfo];
 }
 
-RCT_EXPORT_METHOD(registerForPushNotifications){
+RCT_EXPORT_METHOD(requestPermissions:(NSDictionary *)permissions)
+{
+  if (RCTRunningInAppExtension()) {
+    return;
+  }
 
+  UIUserNotificationType types = UIUserNotificationTypeNone;
+  if (permissions) {
+    if ([RCTConvert BOOL:permissions[@"alert"]]) {
+      types |= UIUserNotificationTypeAlert;
+    }
+    if ([RCTConvert BOOL:permissions[@"badge"]]) {
+      types |= UIUserNotificationTypeBadge;
+    }
+    if ([RCTConvert BOOL:permissions[@"sound"]]) {
+      types |= UIUserNotificationTypeSound;
+    }
+  } else {
+    types = UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
+  }
+
+  UIApplication *app = RCTSharedApplication();
+  if ([app respondsToSelector:@selector(registerUserNotificationSettings:)]) {
+    UIUserNotificationSettings *notificationSettings =
+      [UIUserNotificationSettings settingsForTypes:(NSUInteger)types categories:nil];
+    [app registerUserNotificationSettings:notificationSettings];
+    [app registerForRemoteNotifications];
+  } else {
+    [app registerForRemoteNotificationTypes:(NSUInteger)types];
+  }
+}
+
+RCT_EXPORT_METHOD(registerForPushNotifications){
     [oneSignal registerForPushNotifications];
 }
 

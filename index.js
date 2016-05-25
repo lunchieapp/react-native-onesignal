@@ -48,6 +48,24 @@ Notifications.unregister = function() {
 	this.onNotificationOpened = false;
 };
 
+Notifications.requestPermissions(permissions) {
+  var requestedPermissions = {};
+  if (permissions) {
+    requestedPermissions = {
+      alert: !!permissions.alert,
+      badge: !!permissions.badge,
+      sound: !!permissions.sound
+    };
+  } else {
+    requestedPermissions = {
+      alert: true,
+      badge: true,
+      sound: true
+    };
+  }
+  RNOneSignal.requestPermissions(requestedPermissions);
+}
+
 Notifications.registerForPushNotifications = function(){
 	RNOneSignal.registerForPushNotifications();
 };
