@@ -48,7 +48,7 @@ Notifications.unregister = function() {
 	this.onNotificationOpened = false;
 };
 
-Notifications.requestPermissions(permissions) {
+Notifications.requestPermissions = function(permissions) {
   var requestedPermissions = {};
   if (permissions) {
     requestedPermissions = {
@@ -64,7 +64,7 @@ Notifications.requestPermissions(permissions) {
     };
   }
   RNOneSignal.requestPermissions(requestedPermissions);
-}
+};
 
 Notifications.registerForPushNotifications = function(){
 	RNOneSignal.registerForPushNotifications();
