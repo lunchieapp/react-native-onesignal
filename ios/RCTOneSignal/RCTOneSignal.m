@@ -4,6 +4,7 @@
 #import "RCTEventDispatcher.h"
 
 NSString *const OSRemoteNotificationReceived = @"RemoteNotificationReceived";
+NSString *const OSRemoteNotificationsRegistered = @"RemoteNotificationsRegistered";
 
 @interface RCTOneSignal()
 
@@ -22,22 +23,26 @@ RCT_EXPORT_MODULE(RNOneSignal)
 
 - (void)setBridge:(RCTBridge *)receivedBridge {
     _bridge = receivedBridge;
-    
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleRemoteNotificationReceived:)
                                                  name:OSRemoteNotificationReceived
                                                object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleRemoteNotificationsRegistered:)
+                                                 name:OSRemoteNotificationsRegistered
+                                               object:nil];
 }
 
 - (id)initWithLaunchOptions:(NSDictionary *)launchOptions appId:(NSString *)appId{
-    
+
     return [self initWithLaunchOptions:launchOptions appId:appId autoRegister:YES];
 }
 
 - (id)initWithLaunchOptions:(NSDictionary *)launchOptions appId:(NSString *)appId autoRegister:(BOOL)autoRegister {
     // Eanble logging to help debug issues. visualLevel will show alert dialog boxes.
     [OneSignal setLogLevel:ONE_S_LL_NONE visualLevel:ONE_S_LL_NONE];
-    
+
     oneSignal = [[OneSignal alloc]
                       initWithLaunchOptions:launchOptions
                       appId:appId
@@ -60,7 +65,7 @@ RCT_EXPORT_MODULE(RNOneSignal)
                                                                               object:self userInfo:dictionary];
                       }
                  autoRegister:autoRegister];
-    
+
     [oneSignal enableInAppAlertNotification:NO];
     return self;
 }
@@ -74,8 +79,12 @@ RCT_EXPORT_MODULE(RNOneSignal)
     [_bridge.eventDispatcher sendDeviceEventWithName:@"remoteNotificationOpened" body:notification.userInfo];
 }
 
+- (void)handleRemoteNotificationsRegistered:(NSNotification *)notification {
+    [_bridge.eventDispatcher sendDeviceEventWithName:@"remoteNotificationsRegistered" body:notification.userInfo];
+}
+
 RCT_EXPORT_METHOD(registerForPushNotifications){
-    
+
     [oneSignal registerForPushNotifications];
 }
 

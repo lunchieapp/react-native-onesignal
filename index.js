@@ -11,10 +11,12 @@ const { RNOneSignal } = NativeModules;
 var Notifications = {
 	onError: false,
 	onNotificationOpened: false,
+	onNotificationsRegistered: false
 };
 
 var _pendingNotifications = [];
 var DEVICE_NOTIF_EVENT = 'remoteNotificationOpened';
+var DEVICE_NOTIF_REG_EVENT = 'remoteNotificationsRegistered';
 
 /**
  * Configure local and remote notifications
@@ -54,6 +56,13 @@ Notifications._onNotificationOpened = function(message, data, isActive) {
 		return;
 	}
 	this.onNotificationOpened(message, data, isActive);
+};
+
+Notifications._onNotificationsRegistered = function(payload) {
+	if ( this.onNotificationsRegistered === false ) {
+		return;
+	}
+	this.onNotificationsRegistered(payload);
 };
 
 Notifications.sendTag = function(key, value) {
@@ -106,5 +115,9 @@ DeviceEventEmitter.addListener(DEVICE_NOTIF_EVENT, function(notifData) {
 		Notifications._onNotificationOpened(message, data, isActive);
 	}
 );
+
+DeviceEventEmitter.addListener(DEVICE_NOTIF_REG_EVENT, function(notifData) {
+	Notifications._onNotificationsRegistered(notifData)
+})
 
 module.exports = Notifications;
