@@ -1,7 +1,9 @@
 #import "RCTOneSignal.h"
 
 #import "RCTBridge.h"
+#import "RCTConvert.h"
 #import "RCTEventDispatcher.h"
+#import "RCTUtils.h"
 
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
 
